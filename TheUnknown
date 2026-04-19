@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE VEIL • $1 to the Unknown</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Space+Grotesk:wght@500;600&display=swap');
+        
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .title-font { font-family: 'Playfair Display', serif; }
+        
+        .hero-bg {
+            background: radial-gradient(circle at 50% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 70%),
+                        radial-gradient(circle at 80% 80%, rgba(192, 38, 211, 0.12) 0%, transparent 60%);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 10px rgb(168 85 247), 0 0 20px rgb(168 85 247), 0 0 40px rgb(168 85 247);
+        }
+        
+        .veil-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 60px -15px rgb(168 85 247);
+        }
+        
+        .modal { animation: modalPop 0.3s ease forwards; }
+        @keyframes modalPop { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .donation-particle {
+            position: absolute; width: 6px; height: 6px; background: #a855f7; border-radius: 50%;
+            box-shadow: 0 0 12px #a855f7; animation: particleRise 2.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-[#0a051f] text-white min-h-screen overflow-x-hidden hero-bg">
+
+    <!-- (All the same beautiful UI from before — I kept it 100% identical) -->
+    <nav class="border-b border-white/10 backdrop-blur-lg bg-[#0a051f]/80 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-8 h-8 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-xl">🌀</div>
+                <h1 class="title-font text-3xl tracking-tighter glow-text">THE VEIL</h1>
+            </div>
+            <div class="flex items-center gap-x-2 text-xs bg-white/5 px-4 py-2 rounded-3xl border border-white/10">
+                <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                LIVE • <span id="live-count" class="font-mono">247</span> souls have entered
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative pt-20 pb-16 max-w-6xl mx-auto px-6 z-10">
+        <div class="text-center max-w-2xl mx-auto">
+            <div class="inline-flex items-center gap-x-2 bg-white/5 text-violet-300 text-xs uppercase tracking-[2px] px-6 py-3 rounded-3xl border border-violet-300/30 mb-8">
+                <i class="fa-solid fa-eye"></i>
+                ONE DOLLAR • MAXIMUM ONE PER PERSON
+            </div>
+            
+            <h1 class="title-font text-7xl md:text-8xl leading-none tracking-tighter glow-text mb-4">
+                $1 TO THE<br>UNKNOWN
+            </h1>
+            
+            <p class="text-2xl md:text-3xl text-violet-200/90 font-light mb-10">
+                The purpose remains hidden.<br>
+                Even we don't know why.
+            </p>
+            
+            <div onclick="initiateDonation()" 
+                 class="veil-card cursor-pointer mx-auto w-fit bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-medium text-2xl px-16 py-8 rounded-3xl flex items-center gap-x-4 shadow-2xl shadow-violet-500/50">
+                <span>OFFER YOUR DOLLAR</span>
+                <i class="fa-solid fa-hand-holding-dollar text-4xl"></i>
+            </div>
+            
+            <p class="text-xs text-white/40 mt-8 flex items-center justify-center gap-x-2">
+                <i class="fa-solid fa-lock"></i>
+                SECURE • ANONYMOUS • IRREVERSIBLE
+                <span class="flex-1 h-px bg-white/10 max-w-[120px]"></span>
+                <span id="donor-count-hero" class="font-mono text-emerald-400">381</span> DOLLARS ALREADY ABSORBED
+            </p>
+        </div>
+    </section>
+
+    <!-- DONATE MODAL (now real) -->
+    <div id="donation-modal" onclick="if(event.target.id === 'donation-modal') hideModal()" 
+         class="hidden fixed inset-0 bg-black/80 backdrop-blur-xl z-[9999] flex items-center justify-center">
+        
+        <div onclick="event.stopImmediatePropagation()" 
+             class="modal bg-[#120d22] w-full max-w-lg mx-4 rounded-3xl p-8 border border-violet-400/30">
+            
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center gap-x-3">
+                    <span class="text-3xl">🌀</span>
+                    <h3 class="title-font text-3xl">THE RITUAL</h3>
+                </div>
+                <button onclick="hideModal()" class="text-white/40 hover:text-white text-3xl leading-none">×</button>
+            </div>
+            
+            <div id="modal-content">
+                <!-- Step 1: Real Payment Button -->
+                <div id="step-1">
+                    <p class="text-center text-white/70 mb-8 text-lg">
+                        You are about to offer <span class="font-mono text-4xl text-violet-400">$1.00</span> to the Veil.<br>
+                        The purpose is, and will remain, a mystery.
+                    </p>
+                    
+                    <a id="stripe-payment-link" href="#" target="_blank"
+                       class="block w-full py-6 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-xl font-medium rounded-2xl flex items-center justify-center gap-x-3 hover:from-violet-500 hover:to-fuchsia-500 transition-all">
+                        <i class="fa-solid fa-circle-check"></i>
+                        COMPLETE THE OFFERING
+                    </a>
+                    
+                    <p class="text-[10px] text-center text-white/30 mt-6">Powered by Stripe • Secure checkout</p>
+                </div>
+                
+                <!-- Success screen (shown automatically after payment) -->
+                <div id="step-3" class="hidden text-center">
+                    <div class="mb-6 text-7xl">🌌</div>
+                    <h2 class="title-font text-4xl mb-2">IT IS DONE</h2>
+                    <p id="mystery-message" class="text-xl text-violet-200 mb-8"></p>
+                    
+                    <div class="bg-black/40 rounded-2xl p-6 mb-8 text-left font-mono text-sm">
+                        <div class="flex justify-between mb-2"><span>Amount offered</span><span class="text-violet-400">$1.00</span></div>
+                        <div class="flex justify-between"><span>Status</span><span class="text-emerald-400">ABSORBED BY THE VEIL</span></div>
+                    </div>
+                    
+                    <button onclick="hideModal()" 
+                            class="w-full py-5 border border-white/30 hover:bg-white/10 rounded-2xl text-lg">
+                        RETURN TO THE SHADOWS
+                    </button>
+                    <div id="particle-container" class="relative h-0"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === REPLACE THIS WITH YOUR STRIPE PAYMENT LINK ===
+        const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/YOUR_LINK_HERE";   // ← PASTE YOUR LINK HERE
+
+        let liveCount = 247;
+        const liveEl = document.getElementById('live-count');
+        setInterval(() => { liveCount += Math.floor(Math.random()*3)+1; liveEl.textContent = liveCount; }, 2800);
+
+        let heroCount = 381;
+        const heroEl = document.getElementById('donor-count-hero');
+        setInterval(() => { heroCount += Math.floor(Math.random()*4)+1; heroEl.textContent = heroCount; }, 4200);
+
+        function hasDonated() {
+            return localStorage.getItem('veil_donated') === 'true';
+        }
+
+        function markAsDonated() {
+            localStorage.setItem('veil_donated', 'true');
+        }
+
+        function initiateDonation() {
+            if (hasDonated()) {
+                alert("🌀 You have already offered your dollar to the Veil.");
+                return;
+            }
+            const modal = document.getElementById('donation-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Set the real Stripe link
+            document.getElementById('stripe-payment-link').href = STRIPE_PAYMENT_LINK;
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('donation-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Auto-show success screen if returning from Stripe payment
+        function checkSuccessParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('success') === 'true') {
+                const modal = document.getElementById('donation-modal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                document.getElementById('step-1').classList.add('hidden');
+                const step3 = document.getElementById('step-3');
+                step3.classList.remove('hidden');
+                
+                const messages = [
+                    "The void thanks you. Something ancient stirs.",
+                    "Your dollar has been woven into the fabric of the unknown.",
+                    "A new shadow now walks among us. Welcome.",
+                    "The mystery grows heavier by one dollar.",
+                    "The Veil is pleased. You will never know why."
+                ];
+                document.getElementById('mystery-message').innerHTML = messages[Math.floor(Math.random() * messages.length)];
+                
+                markAsDonated();
+                createParticles();
+                
+                // Clean URL so refreshing doesn't show success again
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particle-container');
+            for (let i = 0; i < 60; i++) {
+                const p = document.createElement('div');
+                p.className = 'donation-particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDuration = (Math.random() * 1.8 + 1.2) + 's';
+                container.appendChild(p);
+                setTimeout(() => p.remove(), 4000);
+            }
+        }
+
+        // Start
+        window.onload = () => {
+            checkSuccessParam();
+            console.log('%cTHE VEIL is now accepting real offerings 🌀', 'color:#a855f7; font-family:monospace');
+        };
+    </script>
+</body>
+</html>
